@@ -171,6 +171,17 @@ def ComputeGeodeticAlts(X_ecef, Y_ecef, Z_ecef, lats):
     cosLatSq = cosLat * cosLat
 
     # get constants from the earth
-    a = c.EarthSemiMajor
-    e = c.EarthEccentricity
+    a = c.earthEquatorialRadius
+    b = c.earthPolarRadius
+	# flattening factor of earth
+	f = 1.0 - (b / a)
+	alpha = f*f - 2.0*f
+	
+	# now compute altitudes for each lat
+	alts = np.sqrt( rSq - ( cosLatSq * sinLatSq * alpha ) / (1.0 + alpha * sinLatSq) ) - \
+		a * np.sqrt( 1.0 + alpha * sinLatSq )
+	
+	return alts
+	
+	
     

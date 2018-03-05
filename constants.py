@@ -14,5 +14,3 @@ omega_earth = 0.2506844773746215 * (deg2rad / 60)  # convert (deg/min) -> (rad/s
 lat0 = 45.0*np.pi/180.0
 earthEquatorialRadius = Re
 earthPolarRadius = 6.356752e6
-earthSemiMajor =
-earthEccentricity = 

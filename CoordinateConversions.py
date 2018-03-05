@@ -159,7 +159,7 @@ def ComputeGeodeticLon(X_ecef, Y_ecef):
 	return lons
 
 
-	def ComputeGeodeticAlts(X_ecef, Y_ecef, Z_ecef, lats):
+def ComputeGeodeticAlts(X_ecef, Y_ecef, Z_ecef, lats):
 	# this formula obtained from Wiki page
 	# on geographic conversion, computing
 	# altitude from 
@@ -179,9 +179,9 @@ def ComputeGeodeticLon(X_ecef, Y_ecef):
 
 	# now compute altitudes for each lat
 	alts = np.sqrt( rSq - ( cosLatSq * sinLatSq * alpha ) / (1.0 + alpha * sinLatSq) ) - \
-		a * np.sqrt( 1.0 + alpha * sinLatSq )
+	a * np.sqrt( 1.0 + alpha * sinLatSq )
 
 	return alts
-	
+
 	
     

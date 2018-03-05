@@ -158,32 +158,33 @@ def SetupWindow(root):
 	
 def ConstructSatelliteTracks(key, lons, lats):
 	# miller projection
-	map = Basemap(projection = 'mill', llcrnrlat=-90,urcrnrlat=90,\
-					  llcrnrlon=-180,urcrnrlon=180,resolution='c')
+    map = Basemap(projection = 'mill', llcrnrlat=-90,urcrnrlat=90,\
+                      llcrnrlon=-180,urcrnrlon=180,resolution='c')
 
 	# plot coastlines, draw label meridians and parallels.
-	map.drawcoastlines()
-	map.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
-	map.drawmeridians(np.arange(map.lonmin, map.lonmax+30,60), labels=[0,0,0,1])
+	#map.drawcoastlines()
+    map.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
+    map.drawmeridians(np.arange(map.lonmin, map.lonmax+30,60), labels=[0,0,0,1])
 
 	# fill continents 'coral' (with zorder=0), color wet areas 'aqua'
-	map.drawmapboundary(fill_color='aqua')
-	map.fillcontinents(color='coral',lake_color='aqua')
+	#map.drawmapboundary(fill_color='aqua')
+	#map.fillcontinents(color='coral',lake_color='aqua')
+    map.bluemarble()
 	
-	x, y = map(lons, lats)
-	n_elem = x.size
-	map.plot(x, y, 'ro', markersize=2, latlon=False)
-	map.plot(x[0], y[0], 'ks', markersize=8, latlon=False, label='Start')
-	map.plot(x[-1], y[-1], 'bs', markersize=8, latlon=False, label='End')
+    x, y = map(lons, lats)
+    n_elem = x.size
+    map.plot(x, y, 'ro', markersize=2, latlon=False)
+    map.plot(x[0], y[0], 'ks', markersize=8, latlon=False, label='Start')
+    map.plot(x[-1], y[-1], 'bs', markersize=8, latlon=False, label='End')
 
 	# shade the night areas, with alpha transparency so the
 	# map shows through. Use current time in UTC.
 	#date = datetime.utcnow()
 	#CS = map.nightshade(date)
 	#plt.title('Day/Night Map for %s (UTC)' % date.strftime("%d %b %Y %H:%M:%S"))
-	plt.title(key + ' Satellite Tracks On The Earth')
-	plt.legend()
-	plt.show()
+    plt.title(key + ' Satellite Tracks On The Earth')
+    plt.legend()
+    plt.show()
 
 	
 

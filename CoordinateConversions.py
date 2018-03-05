@@ -159,4 +159,18 @@ def ComputeGeodeticLon(X_ecef, Y_ecef):
 	return lons
 
 
+def ComputeGeodeticAlts(X_ecef, Y_ecef, Z_ecef, lats):
+    # this formula obtained from Wiki page
+    # on geographic conversion, computing
+    # altitude from 
+    r = np.sqrt(X_ecef * X_ecef + Y_ecef * Y_ecef + Z_ecef * Z_ecef)
+    rSq = r * r
+    sinLat = np.sin(lats) # make sure in radians
+    cosLat = np.cos(lats) # make sure in radians
+    sinLatSq = sinLat * sinLat
+    cosLatSq = cosLat * cosLat
+
+    # get constants from the earth
+    a = c.EarthSemiMajor
+    e = c.EarthEccentricity
     

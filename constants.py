@@ -12,3 +12,7 @@ day2sec = 1.0 / (24.0 * 3600.0)                    # days to seconds
 num_time_pts = 5000                     
 omega_earth = 0.2506844773746215 * (deg2rad / 60)  # convert (deg/min) -> (rad/s)
 lat0 = 45.0*np.pi/180.0
+earthEquatorialRadius = Re
+earthPolarRadius = 6.356752e6
+earthSemiMajor =
+earthEccentricity = 

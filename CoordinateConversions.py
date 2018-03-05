@@ -155,32 +155,32 @@ def ComputeGeodeticLat2(X_ecef, Y_ecef, Z_ecef, a, e):
 	
 def ComputeGeodeticLon(X_ecef, Y_ecef):
 	lons = np.arctan2(Y_ecef, X_ecef)
-	
+
 	return lons
 
 
-def ComputeGeodeticAlts(X_ecef, Y_ecef, Z_ecef, lats):
-    # this formula obtained from Wiki page
-    # on geographic conversion, computing
-    # altitude from 
-    r = np.sqrt(X_ecef * X_ecef + Y_ecef * Y_ecef + Z_ecef * Z_ecef)
-    rSq = r * r
-    sinLat = np.sin(lats) # make sure in radians
-    cosLat = np.cos(lats) # make sure in radians
-    sinLatSq = sinLat * sinLat
-    cosLatSq = cosLat * cosLat
+	def ComputeGeodeticAlts(X_ecef, Y_ecef, Z_ecef, lats):
+	# this formula obtained from Wiki page
+	# on geographic conversion, computing
+	# altitude from 
+	r = np.sqrt(X_ecef * X_ecef + Y_ecef * Y_ecef + Z_ecef * Z_ecef)
+	rSq = r * r
+	sinLat = np.sin(lats) # make sure in radians
+	cosLat = np.cos(lats) # make sure in radians
+	sinLatSq = sinLat * sinLat
+	cosLatSq = cosLat * cosLat
 
-    # get constants from the earth
-    a = c.earthEquatorialRadius
-    b = c.earthPolarRadius
+	# get constants from the earth
+	a = c.earthEquatorialRadius
+	b = c.earthPolarRadius
 	# flattening factor of earth
 	f = 1.0 - (b / a)
 	alpha = f*f - 2.0*f
-	
+
 	# now compute altitudes for each lat
 	alts = np.sqrt( rSq - ( cosLatSq * sinLatSq * alpha ) / (1.0 + alpha * sinLatSq) ) - \
 		a * np.sqrt( 1.0 + alpha * sinLatSq )
-	
+
 	return alts
 	
 	

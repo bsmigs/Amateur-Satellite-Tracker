@@ -26,14 +26,14 @@ def ConvertTLEToKepElem(tle_dict, utc_start_time, utc_end_time):
 		tle_elem = tle_dict[key]
 
 		epoch_year = int(tle_elem[0])
-		epoch_days = tle_elem[1]                        # units of days
+		epoch_days = tle_elem[1]                          # units of days
 		inclination = tle_elem[2]*c.deg2rad               # radians
 		raan = tle_elem[3]*c.deg2rad                      # radians
-		ecc = tle_elem[4]
+		ecc = tle_elem[4]                                 # dimensionless
 		arg_perigee = tle_elem[5]*c.deg2rad               # radians
 		mean_anomaly = tle_elem[6]*c.deg2rad              # radians
-		mean_motion = tle_elem[7]*c.twoPi*c.day2sec         # radians per s
-		ftdmm = tle_elem[8]*c.twoPi*c.day2sec*c.day2sec       # radians per s^2
+		mean_motion = tle_elem[7]*c.twoPi*c.day2sec       # radians per s
+		ftdmm = tle_elem[8]*c.twoPi*c.day2sec*c.day2sec   # radians per s^2
 		
         # semi-major axis
 		#a = np.power(c.GM / np.power(mean_motion, 2.0), 1.0/3.0)

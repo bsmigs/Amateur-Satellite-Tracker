@@ -24,8 +24,13 @@ def runPredictionTool(start_time_list, end_time_list, checkbox_dict):
 		
 	utc_start_time = utc_start_time.rstrip()
 	utc_end_time = utc_end_time.rstrip()
+
+
+    
+
+    
 	
-	latslons_dict = ConvertTLEToStateVectors(utc_start_time, utc_end_time)
+	latslons_dict = ConvertKepElemToStateVectors(utc_start_time, utc_end_time)
 	
 	for key in checkbox_dict:
 		#print "key=", key
@@ -36,7 +41,7 @@ def runPredictionTool(start_time_list, end_time_list, checkbox_dict):
 			lons = latslons[:,0]
 			lats = latslons[:,1]
 			
-			ConstructSatelliteTracks(key, lons, lats)
+			PlotSatelliteTracks(key, lons, lats)
 
 			print "Last 10 lons = ",lons[-11:-1]
 			print "Last 10 lats = ",lats[-11:-1]
@@ -156,7 +161,7 @@ def SetupWindow(root):
 	qb.grid(row=2, column=2, padx=15, pady=15, sticky=tk.S)
 	
 	
-def ConstructSatelliteTracks(key, lons, lats):
+def PlotSatelliteTracks(key, lons, lats):
 	# miller projection
     map = Basemap(projection = 'mill', llcrnrlat=-90,urcrnrlat=90,\
                       llcrnrlon=-180,urcrnrlon=180,resolution='c')
@@ -188,7 +193,7 @@ def ConstructSatelliteTracks(key, lons, lats):
 
 	
 
-def ConvertTLEToStateVectors(utc_start_time, utc_end_time):
+def ConvertKepElemToStateVectors(utc_start_time, utc_end_time):
 	# parse the current TLE file
     tle_dict = ParseTwoLineElementFile()
     

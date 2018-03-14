@@ -16,24 +16,28 @@ fig = plt.figure()
 # miller projection
 myMap = Basemap(projection = 'mill', llcrnrlat=-90, urcrnrlat=90, \
                       llcrnrlon=-180, urcrnrlon=180, resolution='c')
-myMap.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
-myMap.drawmeridians(np.arange(myMap.lonmin, myMap.lonmax+30,60), labels=[0,0,0,1])
+myMap.drawparallels(np.arange(-90, 90, 30), labels=[1, 0, 0, 0])
+myMap.drawmeridians(np.arange(myMap.lonmin, myMap.lonmax+30, 60), labels=[0, 0, 0, 1])
 myMap.bluemarble()
 x, y = myMap([], [])
-point = myMap.plot(x, y, 'ro', markersize=2, latlon=False)[0]
+point = myMap.plot(x, y, 'ro', markersize=4, latlon=False)[0]
 
 
 def animate(ii, selected_tle_dict):    
-    latslons_dict = ConvertKepToStateVectors(selected_tle_dict)			
+    latslons_dict = ConvertKepToStateVectors(selected_tle_dict)
+
+    xList = []
+    yList = []
     for key in latslons_dict:
         latslons = latslons_dict[key]
         lons = latslons[:,0]
         lats = latslons[:,1]
         x, y = myMap(lons, lats)
-        point.set_data(x, y)
-        #myMap.plot(x, y, 'ro', markersize=2, latlon=False)
-        #myMap.plot(x[0], y[0], 'ks', markersize=8, latlon=False, label='Start')
-        #myMap.plot(x[-1], y[-1], 'bs', markersize=8, latlon=False, label='End')
+
+        xList.append(x)
+        yList.append(y)
+
+    point.set_data(xList, yList)
 
     # shade the night areas, with alpha transparency so the
     # map shows through. Use current time in UTC.
@@ -49,21 +53,6 @@ def animate(ii, selected_tle_dict):
 	
 #def runPredictionTool(start_time_list, end_time_list, checkbox_dict, tle_dict):
 def runPredictionTool(checkbox_dict, tle_dict):
-    '''
-    utc_start_time = ''
-    for elem in start_time_list:
-        utc_start_time += elem.get()
-        utc_start_time += ' '
-	
-    utc_end_time = ''
-    for elem in end_time_list:
-        utc_end_time += elem.get()
-        utc_end_time += ' '
-		
-    utc_start_time = utc_start_time.rstrip()
-    utc_end_time = utc_end_time.rstrip()
-	'''
-	
     selected_tle_dict = {}
     for key in checkbox_dict:
         if (checkbox_dict[key].get() == 1):
@@ -71,7 +60,7 @@ def runPredictionTool(checkbox_dict, tle_dict):
 
 	# get lat/lons for all selected sats
 	#latslons_dict = ConvertKepToStateVectors(selected_tle_dict, utc_start_time, utc_end_time)	
-    ani = animation.FuncAnimation(fig, animate, fargs=(selected_tle_dict,), interval=1000, \
+    ani = animation.FuncAnimation(fig, animate, fargs=(selected_tle_dict,), interval=500, \
                                       blit=True, repeat=False)
 
     plt.show()

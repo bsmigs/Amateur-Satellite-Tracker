@@ -9,42 +9,74 @@ from datetime import datetime
 import constants as c
 import Tkinter as tk
 import tkFont
+from matplotlib import animation
 
-	
-def runPredictionTool(start_time_list, end_time_list, checkbox_dict):
-	utc_start_time = ''
-	for elem in start_time_list:
-		utc_start_time += elem.get()
-		utc_start_time += ' '
-	
-	utc_end_time = ''
-	for elem in end_time_list:
-		utc_end_time += elem.get()
-		utc_end_time += ' '
-		
-	utc_start_time = utc_start_time.rstrip()
-	utc_end_time = utc_end_time.rstrip()
+fig = plt.figure()
 
+# miller projection
+map = Basemap(projection = 'mill', llcrnrlat=-90, urcrnrlat=90, \
+                      llcrnrlon=-180, urcrnrlon=180, resolution='c')
+
+# plot coastlines, draw label meridians and parallels.
+map.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
+map.drawmeridians(np.arange(map.lonmin, map.lonmax+30,60), labels=[0,0,0,1])
+map.bluemarble()
+
+
+
+def animate(ii, selected_tle_dict):    
+    latslons_dict = ConvertKepToStateVectors(selected_tle_dict)			
+    for key in latslons_dict:
+        latslons = latslons_dict[key]
+        lons = latslons[:,0]
+        lats = latslons[:,1]
+        x, y = map(lons, lats)
+        map.plot(x, y, 'ro', markersize=2, latlon=False)
+        #map.plot(x[0], y[0], 'ks', markersize=8, latlon=False, label='Start')
+        #map.plot(x[-1], y[-1], 'bs', markersize=8, latlon=False, label='End')
+
+    # shade the night areas, with alpha transparency so the
+    # map shows through. Use current time in UTC.
+    date = datetime.utcnow()
+    CS = map.nightshade(date)
+    #plt.title('Satellite Tracks for %s (UTC)' % date.strftime("%d %b %Y %H:%M:%S"))
+    #plt.legend()
 
     
+    
+    
+
+	
+#def runPredictionTool(start_time_list, end_time_list, checkbox_dict, tle_dict):
+def runPredictionTool(checkbox_dict, tle_dict):
+    '''
+    utc_start_time = ''
+    for elem in start_time_list:
+        utc_start_time += elem.get()
+        utc_start_time += ' '
+	
+    utc_end_time = ''
+    for elem in end_time_list:
+        utc_end_time += elem.get()
+        utc_end_time += ' '
+		
+    utc_start_time = utc_start_time.rstrip()
+    utc_end_time = utc_end_time.rstrip()
+	'''
+	
+    selected_tle_dict = {}
+    for key in checkbox_dict:
+        if (checkbox_dict[key].get() == 1):
+            selected_tle_dict[key] = tle_dict[key]
+
+	# get lat/lons for all selected sats
+	#latslons_dict = ConvertKepToStateVectors(selected_tle_dict, utc_start_time, utc_end_time)	
+    ani = animation.FuncAnimation(fig, animate, fargs=(selected_tle_dict,), interval=1000, \
+                                      blit=True, repeat=False)
+
+    plt.show()
 
     
-	
-	latslons_dict = ConvertKepElemToStateVectors(utc_start_time, utc_end_time)
-	
-	for key in checkbox_dict:
-		#print "key=", key
-		#print "value=", checkbox_dict[key].get()
-		
-		if (checkbox_dict[key].get() == 1):
-			latslons = latslons_dict[key]
-			lons = latslons[:,0]
-			lats = latslons[:,1]
-			
-			PlotSatelliteTracks(key, lons, lats)
-
-			print "Last 10 lons = ",lons[-11:-1]
-			print "Last 10 lats = ",lats[-11:-1]
 
 
 
@@ -80,6 +112,7 @@ def SetupWindow(root):
 		checkbox_dict[key] = var
 
 	# define a frame for the entered start/end times
+	'''
 	frame_2 = tk.Frame(root)
 	frame_2.grid(row=1, column=1, columnspan=12)
 
@@ -147,13 +180,15 @@ def SetupWindow(root):
 
 	start_time_list = [start_year, start_month, start_day, start_hour, start_minute, start_second]
 	end_time_list = [end_year, end_month, end_day, end_hour, end_minute, end_second]
+	'''
 
 	# define a frame for the run/quit buttons
 	frame_3 = tk.Frame(root)
 	frame_3.grid(row=2, column=1, columnspan=12)
 
 	# run button
-	rb = tk.Button(frame_3, text='Run Prediction', font=helv36, bg='green', command=(lambda a=start_time_list, b=end_time_list, c=checkbox_dict: runPredictionTool(a, b, c)))
+	#rb = tk.Button(frame_3, text='Run Prediction', font=helv36, bg='green', command=(lambda a=start_time_list, b=end_time_list, c=checkbox_dict, d=tle_dict: runPredictionTool(a, b, c, d)))
+	rb = tk.Button(frame_3, text='Run Prediction', font=helv36, bg='green', command=(lambda c=checkbox_dict, d=tle_dict: runPredictionTool(c, d)))
 	rb.grid(row=2, column=1, padx=15, pady=15, sticky=tk.S)
 
 	# quit button
@@ -161,90 +196,100 @@ def SetupWindow(root):
 	qb.grid(row=2, column=2, padx=15, pady=15, sticky=tk.S)
 	
 	
-def PlotSatelliteTracks(key, lons, lats):
+	
+def ConstructSatelliteTracks(latslons_dict):
 	# miller projection
-    map = Basemap(projection = 'mill', llcrnrlat=-90,urcrnrlat=90,\
-                      llcrnrlon=-180,urcrnrlon=180,resolution='c')
+	map = Basemap(projection = 'mill', llcrnrlat=-90,urcrnrlat=90,\
+					  llcrnrlon=-180,urcrnrlon=180,resolution='c')
 
 	# plot coastlines, draw label meridians and parallels.
 	#map.drawcoastlines()
-    map.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
-    map.drawmeridians(np.arange(map.lonmin, map.lonmax+30,60), labels=[0,0,0,1])
+	map.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
+	map.drawmeridians(np.arange(map.lonmin, map.lonmax+30,60), labels=[0,0,0,1])
 
 	# fill continents 'coral' (with zorder=0), color wet areas 'aqua'
 	#map.drawmapboundary(fill_color='aqua')
 	#map.fillcontinents(color='coral',lake_color='aqua')
-    map.bluemarble()
-	
-    x, y = map(lons, lats)
-    n_elem = x.size
-    map.plot(x, y, 'ro', markersize=2, latlon=False)
-    map.plot(x[0], y[0], 'ks', markersize=8, latlon=False, label='Start')
-    map.plot(x[-1], y[-1], 'bs', markersize=8, latlon=False, label='End')
+	map.bluemarble()
+
+	for key in latslons_dict:
+		latslons = latslons_dict[key]
+		lons = latslons[:,0]
+		lats = latslons[:,1]
+
+		x, y = map(lons, lats)
+		n_elem = x.size
+		map.plot(x, y, 'ro', markersize=2, latlon=False)
+		#map.plot(x[0], y[0], 'ks', markersize=8, latlon=False, label='Start')
+		#map.plot(x[-1], y[-1], 'bs', markersize=8, latlon=False, label='End')
 
 	# shade the night areas, with alpha transparency so the
 	# map shows through. Use current time in UTC.
-	#date = datetime.utcnow()
-	#CS = map.nightshade(date)
-	#plt.title('Day/Night Map for %s (UTC)' % date.strftime("%d %b %Y %H:%M:%S"))
-    plt.title(key + ' Satellite Tracks On The Earth')
-    plt.legend()
-    plt.show()
+	date = datetime.utcnow()
+	CS = map.nightshade(date)
+	plt.title('Satellite Tracks for %s (UTC)' % date.strftime("%d %b %Y %H:%M:%S"))
+	plt.legend()
+	plt.show()
 
 	
 
-def ConvertKepElemToStateVectors(utc_start_time, utc_end_time):
+def ConvertKepToStateVectors(tle_dict):
+#def ConvertKepToStateVectors(tle_dict, utc_start_time, utc_end_time):
 	# parse the current TLE file
-    tle_dict = ParseTwoLineElementFile()
-    
-	# construct orbital/keplerian elements at requested time
-    tle_dict, time_vec, epoch_year = ConvertTLEToKepElem(tle_dict, utc_start_time, utc_end_time)
-    time_array = Nth_day_to_date(epoch_year, time_vec)
-    
-    # get the julian day
-    jday = JdayInternal(time_array)
-    #print "jday=",jday
-	
-	# get the greenwich mean sidereal time
-    gmst = CalculateGMSTFromJD(jday, time_vec)	
-    #print "GMST=",gmst*c.rad2deg
+	#tle_dict = ParseTwoLineElementFile()
 
-    latslons_dict = {}
-    for key in tle_dict:
-        values = tle_dict[key]
-        
-        a = values[:,0] # semi major axis 
-        e = values[:,1] # eccentricity
-        i = values[:,2] # inclination
-        Omega = values[:,3] # Right ascension of ascending node (big omega)
-        w = values[:,4] # argument of perigee (little omega)
-        nu = values[:,5] # true anomaly
-        epoch_days = values[:,8] # days from epoch
+	# construct orbital/keplerian elements at requested time
+	utc_start_time = datetime.utcnow()
+	utc_start_time = utc_start_time.strftime('%Y %m %d %H %M %S')
+	utc_end_time = utc_start_time
+
+	kep_elem_dict, time_vec, epoch_year = ConvertTLEToKepElem(tle_dict, utc_start_time, utc_end_time)
+	time_array = Nth_day_to_date(epoch_year, time_vec)
+
+	# get the julian day
+	jday = JdayInternal(time_array)
+	#print "jday=",jday
+
+	# get the greenwich mean sidereal time
+	gmst = CalculateGMSTFromJD(jday, time_vec)	
+	#print "GMST=",gmst*c.rad2deg
+
+	latslons_dict = {}
+	for key in kep_elem_dict:
+		values = kep_elem_dict[key]
+		
+		a = values[:,0] # semi major axis 
+		e = values[:,1] # eccentricity
+		i = values[:,2] # inclination
+		Omega = values[:,3] # Right ascension of ascending node (big omega)
+		w = values[:,4] # argument of perigee (little omega)
+		nu = values[:,5] # true anomaly
+		epoch_days = values[:,8] # days from epoch
 		
 		# Convert orbital elements to ECI frame
-        delta_time_vec = time_vec - epoch_days
-        X_eci, Y_eci, Z_eci, Xdot_eci, Ydot_eci, Zdot_eci = ConvertKeplerToECI(a, e, i, Omega, w, nu, delta_time_vec)
+		delta_time_vec = time_vec - epoch_days
+		X_eci, Y_eci, Z_eci, Xdot_eci, Ydot_eci, Zdot_eci = ConvertKeplerToECI(a, e, i, Omega, w, nu, delta_time_vec)
 
 		# convert ECI to ECEF
-        X_ecef, Y_ecef, Z_ecef = ConvertECIToECEF(X_eci, Y_eci, Z_eci, gmst)
+		X_ecef, Y_ecef, Z_ecef = ConvertECIToECEF(X_eci, Y_eci, Z_eci, gmst)
 		
 		# convert ECEF to geodetic (only keep lat/lon)
-        lons = ComputeGeodeticLon(X_ecef, Y_ecef)
-        #lats = np.array([ scipy.optimize.newton(ComputeGeodeticLat, c.lat0, fprime=DComputeGeodeticLat, args=(X_ecef[ii], Y_ecef[ii], Z_ecef[ii], a[ii], e[ii])) for ii in range(0, a.size) ])
-        lats = ComputeGeodeticLat2(X_ecef, Y_ecef, Z_ecef, a, e)
+		lons = ComputeGeodeticLon(X_ecef, Y_ecef)
+		#lats = np.array([ scipy.optimize.newton(ComputeGeodeticLat, c.lat0, fprime=DComputeGeodeticLat, args=(X_ecef[ii], Y_ecef[ii], Z_ecef[ii], a[ii], e[ii])) for ii in range(0, a.size) ])
+		lats = ComputeGeodeticLat2(X_ecef, Y_ecef, Z_ecef, a, e)
 
 		# convert lats/lons to degrees
-        lats *= c.rad2deg
-        lons *= c.rad2deg
+		lats *= c.rad2deg
+		lons *= c.rad2deg
 
 		# store answer in dictionary
-        n_rows = len(lats)
-        results = np.zeros((n_rows, 2), dtype=float)
-        results[:,0] = lons
-        results[:,1] = lats
-        latslons_dict[key] = results
+		n_rows = len(lats)
+		results = np.zeros((n_rows, 2), dtype=float)
+		results[:,0] = lons
+		results[:,1] = lats
+		latslons_dict[key] = results
 
-    return latslons_dict
+	return latslons_dict
 
 
 
@@ -256,9 +301,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     SetupWindow(root)
     root.mainloop()
-
-
-
-
-        
-		

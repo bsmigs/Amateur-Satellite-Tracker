@@ -5,8 +5,6 @@ import sys
 import constants as c
 
 
-#-----------------------------------------------------------------------------
-#-----------------------------------------------------------------------------
 def ConvertLocalTimeToUTC(local_time, used_format='%Y %m %d %H %M %S'):
     local_time = datetime.datetime.strptime(local_time, used_format)
     local = pytz.timezone("America/New_York")
@@ -16,26 +14,6 @@ def ConvertLocalTimeToUTC(local_time, used_format='%Y %m %d %H %M %S'):
     
     return utc
 
-#-----------------------------------------------------------------------------
-#-----------------------------------------------------------------------------
-def GenerateCurrentTimeVec():
-    # get UTC time now
-    utc_start_time = datetime.datetime.utcnow()
-    begin_time = utc_start_time.strftime("%Y %m %d %H %M %S")
-    begin_time_in_days = Date_to_nth_day(begin_time)
-
-    # given a total number of elements in the
-    # time vec, compute the end time if the delta
-    # between each element in the time vec is 1 sec
-    elapsed_time = c.num_time_pts * 1.0 # make sure it's seconds
-    elapsed_time /= 86400.0 # convert to days
-    end_time_in_days = begin_time_in_days + elapsed_time
-    
-    time_vec = np.linspace(future_start_days, future_end_days, num=c.num_time_pts, endpoint=True)
-
-    
-#-----------------------------------------------------------------------------
-#-----------------------------------------------------------------------------
 def GenerateTimeVec(utc_start_time, utc_end_time, tle_epoch_year, tle_epoch_days):
     # start_time = a string of 'year month day hour min sec'
     # end_time = a string of 'year month day hour min sec'
@@ -97,30 +75,38 @@ def Date_to_nth_day(date, used_format='%Y %m %d %H %M %S'):
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 def Nth_day_to_date(year, ndays):
-    # it's encouraged that ndays is a float
-    # so that we can encode more info about
-    # hours, minutes, and seconds
-    year_array_len = np.size(year)
-    days_array_len = np.size(ndays)
+	# it's encouraged that ndays is a float
+	# so that we can encode more info about
+	# hours, minutes, and seconds
+	year_array_len = np.size(year)
+	days_array_len = np.size(ndays)
+	
+	results = np.zeros((days_array_len, 6), dtype=int)
 
-    if (year_array_len == 1 and days_array_len > 1):
-        # it's assumed that the year applies
-        # to all the days
-        year = year*np.ones((days_array_len,), dtype=int)
+	if (year_array_len == 1 and days_array_len > 1):
+		# it's assumed that the year applies
+		# to all the days
+		year = year*np.ones((days_array_len,), dtype=int)
+		
+		for ii in np.arange(0, days_array_len):
+			this_date = datetime.datetime(year[ii], 1, 1, 0, 0, 0) + datetime.timedelta(ndays[ii] - 1.0)
+			this_date = this_date.strftime('%Y %m %d %H %M %S')    
+			this_date = np.fromstring(this_date, dtype=int, sep=' ')
+			results[ii,:] = this_date
+			
+	elif (year_array_len == 1 and days_array_len == 1):
+		#year = np.array([year], dtype=int)
+		#ndays = np.array([ndays], dtype=float)
 
-    if (year_array_len == 1 and days_array_len == 1):
-        year = np.array([year])
-        ndays = np.array([ndays])
-
-    results = np.zeros((days_array_len, 6), dtype=int)
-    for ii in np.arange(0, days_array_len):
-        this_date = datetime.datetime(year[ii], 1, 1, 0, 0, 0) + datetime.timedelta(ndays[ii] - 1.0)
-        this_date = this_date.strftime('%Y %m %d %H %M %S')    
-        this_date = np.fromstring(this_date, dtype=int, sep=' ')
-
-        results[ii,:] = this_date
-        
-    return results
+		# year is just a number, not an array. Not sure
+		# if this is good coding practice
+		this_date = datetime.datetime(year, 1, 1, 0, 0, 0) + datetime.timedelta(ndays[0] - 1.0)
+		this_date = this_date.strftime('%Y %m %d %H %M %S')    
+		this_date = np.fromstring(this_date, dtype=int, sep=' ')
+		results[0,:] = np.array(this_date, dtype=int)
+	
+		
+	return results
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -321,6 +307,3 @@ def CalculateGMSTFromJD(jdut1, time_vec):
 	'''
   
 	return gmst
-
-
-

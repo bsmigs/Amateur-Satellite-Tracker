@@ -14,14 +14,13 @@ from matplotlib import animation
 fig = plt.figure()
 
 # miller projection
-map = Basemap(projection = 'mill', llcrnrlat=-90, urcrnrlat=90, \
+myMap = Basemap(projection = 'mill', llcrnrlat=-90, urcrnrlat=90, \
                       llcrnrlon=-180, urcrnrlon=180, resolution='c')
-
-# plot coastlines, draw label meridians and parallels.
-map.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
-map.drawmeridians(np.arange(map.lonmin, map.lonmax+30,60), labels=[0,0,0,1])
-map.bluemarble()
-
+myMap.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
+myMap.drawmeridians(np.arange(myMap.lonmin, myMap.lonmax+30,60), labels=[0,0,0,1])
+myMap.bluemarble()
+x, y = myMap([], [])
+point = myMap.plot(x, y, 'ro', markersize=2, latlon=False)[0]
 
 
 def animate(ii, selected_tle_dict):    
@@ -30,18 +29,19 @@ def animate(ii, selected_tle_dict):
         latslons = latslons_dict[key]
         lons = latslons[:,0]
         lats = latslons[:,1]
-        x, y = map(lons, lats)
-        map.plot(x, y, 'ro', markersize=2, latlon=False)
-        #map.plot(x[0], y[0], 'ks', markersize=8, latlon=False, label='Start')
-        #map.plot(x[-1], y[-1], 'bs', markersize=8, latlon=False, label='End')
+        x, y = myMap(lons, lats)
+        point.set_data(x, y)
+        #myMap.plot(x, y, 'ro', markersize=2, latlon=False)
+        #myMap.plot(x[0], y[0], 'ks', markersize=8, latlon=False, label='Start')
+        #myMap.plot(x[-1], y[-1], 'bs', markersize=8, latlon=False, label='End')
 
     # shade the night areas, with alpha transparency so the
     # map shows through. Use current time in UTC.
-    date = datetime.utcnow()
-    CS = map.nightshade(date)
+    #date = datetime.utcnow()
+    #CS = myMap.nightshade(date)
     #plt.title('Satellite Tracks for %s (UTC)' % date.strftime("%d %b %Y %H:%M:%S"))
     #plt.legend()
-
+    return point,
     
     
     
@@ -199,34 +199,34 @@ def SetupWindow(root):
 	
 def ConstructSatelliteTracks(latslons_dict):
 	# miller projection
-	map = Basemap(projection = 'mill', llcrnrlat=-90,urcrnrlat=90,\
+	myMap = Basemap(projection = 'mill', llcrnrlat=-90,urcrnrlat=90,\
 					  llcrnrlon=-180,urcrnrlon=180,resolution='c')
 
 	# plot coastlines, draw label meridians and parallels.
-	#map.drawcoastlines()
-	map.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
-	map.drawmeridians(np.arange(map.lonmin, map.lonmax+30,60), labels=[0,0,0,1])
+	#myMap.drawcoastlines()
+	myMap.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
+	myMap.drawmeridians(np.arange(myMap.lonmin, myMap.lonmax+30,60), labels=[0,0,0,1])
 
 	# fill continents 'coral' (with zorder=0), color wet areas 'aqua'
-	#map.drawmapboundary(fill_color='aqua')
-	#map.fillcontinents(color='coral',lake_color='aqua')
-	map.bluemarble()
+	#myMap.drawmyMapboundary(fill_color='aqua')
+	#myMap.fillcontinents(color='coral',lake_color='aqua')
+	myMap.bluemarble()
 
 	for key in latslons_dict:
 		latslons = latslons_dict[key]
 		lons = latslons[:,0]
 		lats = latslons[:,1]
 
-		x, y = map(lons, lats)
+		x, y = myMap(lons, lats)
 		n_elem = x.size
-		map.plot(x, y, 'ro', markersize=2, latlon=False)
-		#map.plot(x[0], y[0], 'ks', markersize=8, latlon=False, label='Start')
-		#map.plot(x[-1], y[-1], 'bs', markersize=8, latlon=False, label='End')
+		myMap.plot(x, y, 'ro', markersize=2, latlon=False)
+		#myMap.plot(x[0], y[0], 'ks', markersize=8, latlon=False, label='Start')
+		#myMap.plot(x[-1], y[-1], 'bs', markersize=8, latlon=False, label='End')
 
 	# shade the night areas, with alpha transparency so the
-	# map shows through. Use current time in UTC.
+	# myMap shows through. Use current time in UTC.
 	date = datetime.utcnow()
-	CS = map.nightshade(date)
+	CS = myMap.nightshade(date)
 	plt.title('Satellite Tracks for %s (UTC)' % date.strftime("%d %b %Y %H:%M:%S"))
 	plt.legend()
 	plt.show()
